@@ -23,3 +23,10 @@ BasicStrategyIntent what should hard {HardTotal} do against {DealerCard}
 BasicStrategyIntent hard {HardTotal} against {DealerCard}
 BasicStrategyIntent what should I do with a hard {HardTotal} against a {DealerCard}
 BasicStrategyIntent what should I do with a hard {HardTotal} against an {DealerCard}
+BasicStrategyIntent what should a pair of {PairCard} do against a {DealerCard}
+BasicStrategyIntent what should a pair of {PairCard} do against an {DealerCard}
+BasicStrategyIntent what should {PairCard} pair do against a {DealerCard}
+BasicStrategyIntent what should {PairCard} pair do against {DealerCard}
+BasicStrategyIntent pair of {PairCard} against {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} against a {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} against an {DealerCard}

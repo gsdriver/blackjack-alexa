@@ -58,7 +58,7 @@ Blackjack.prototype.intentHandlers = {
         var dealerSlot = intent.slots.DealerCard;
         var dealerCard;
         var playerHand = {cards:[], total:0, isSoft:false};
-        var speech;
+        var suggestion;
         var speechError = null;
         var speechOutput;
         var repromptOutput;
@@ -94,17 +94,12 @@ Blackjack.prototype.intentHandlers = {
             response.ask(speechOutput, repromptOutput);
         }
         else {
-            // BUGBUG: We'll just use default set of rules for now
-            var suggest = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true);
-            speech = "You should " + suggest + " with " + (playerHand.isSoft ? "soft " : "") + playerHand.total + " against ";
-            speech += ((dealerCard == 1) || (dealerCard == 8)) ? "an " : "a ";
-            speech += (dealerCard == 1) ? "ace" : dealerCard;
-
+            suggestion = GetSuggstion(playerHand, dealerCard);
             speechOutput = {
-                speech: speech,
+                speech: suggestion.speechText,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
-            response.tellWithCard(speechOutput, cardTitle, suggest);
+            response.tellWithCard(speechOutput, cardTitle, suggestion.action);
         }
     },
     // Stop intent
@@ -164,6 +159,7 @@ function BuildPlayerHand(slots, playerHand)
     var error = null;
     var isSoft;
     var playerTotal;
+    var pairCard = 0;
 
     // OK, let's get the player total and whether it's hard or soft - from there we'll
     // set up the hand appropriately
@@ -174,20 +170,29 @@ function BuildPlayerHand(slots, playerHand)
     } else if (slots.SoftTotal && slots.SoftTotal.value) {
         playerTotal = parseInt(slots.SoftTotal.value);
         isSoft = true;
+    } else if (slots.PairCard && slots.PairCard.value) {
+        pairCard = GetCardValue(slots.PairCard.value);
+        playerTotal = pairCard * 2;
+        if (playerTotal == 2) {
+            playerTotal == 12;
+        }
+        isSoft = false;
     }
 
-    // Check that the total is something we can handle - at the moment we can only process 3-21
-    if (!playerTotal || (playerTotal < 3) || (playerTotal > 21)) {
-        error = "I'm sorry, the player total must be between 3 and 21 inclusive.  What else can I help with?";
+    // Check that the total is something we can handle
+    if (!playerTotal || (playerTotal < 2) || (playerTotal > 21)) {
+        error = "I'm sorry, the player total must be between 2 and 21 inclusive.  What else can I help with?";
     }
     else if (isSoft && (playerTotal < 12)) {
         error = "I'm sorry, soft player totals must be at least 12.  What else can I help with?";
     }
     else 
     {
-        // We need to convert this into a hand we can pass in - for now, we'll just use a 2 or 10 along with the balance
-        // and pass that in (yes, I know this doesn't cover pair of Aces, but bare with me for now)
-        if (isSoft) {
+        // We need to convert this into a hand we can pass in
+        if (pairCard) {
+            playerHand.cards.push(pairCard);
+            playerHand.cards.push(pairCard);
+        } else if (isSoft) {
             playerHand.cards.push(1);
             playerHand.cards.push(playerTotal - 11);
         } else {
@@ -199,6 +204,51 @@ function BuildPlayerHand(slots, playerHand)
     }
 
     return error;
+}
+
+function GetSuggstion(playerHand, dealerCard)
+{
+    var suggest = {speechText: "", action: ""};
+    var isPair;
+                
+    // BUGBUG: We'll just use default set of rules for now
+    suggest.action = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true);
+    if (suggest.action == "noinsurance")
+    {
+        return "You should never take insurance";
+    }
+
+    isPair = (playerHand.cards.length == 2) && (playerHand.cards[0] == playerHand.cards[1]);
+
+    suggest.speechText = "You should " + suggest.action + " with ";
+    if (isPair)
+    {
+        suggest.speechText += "a pair of ";
+        suggest.speechText += (playerHand.cards[0] == 1) ? "aces" : (playerHand.cards[0] + "s");
+    }
+    else
+    {
+        suggest.speechText += (playerHand.isSoft ? "soft " : "") + playerHand.total;
+    }
+
+    suggest.speechText +=  " against ";
+    suggest.speechText += ((dealerCard == 1) || (dealerCard == 8)) ? "an " : "a ";
+    suggest.speechText += (dealerCard == 1) ? "ace" : dealerCard;
+
+    if (suggest.action == "double")
+    {
+        // Try again with a no double rule
+        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {doubleRange:[0,0]});
+        suggest.speechText += ". If double is not allowed, you should " + suggestion;
+    }
+    else if (suggest.action == "surrender")
+    {
+        // Try again with no surrender
+        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {surrender:"none"});
+        suggest.speechText += ". If surrender is not allowed, you should " + suggestion;
+    }
+
+    return suggest;    
 }
 
 exports.handler = function (event, context) 

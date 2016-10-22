@@ -12,6 +12,10 @@
         "type": "AMAZON.NUMBER"
       },
       {
+        "name": "PairCard",
+        "type": "LIST_OF_CARDS"
+      },
+      {
         "name": "DealerCard",
         "type": "LIST_OF_CARDS"
       }
