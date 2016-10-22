@@ -54,35 +54,38 @@ Blackjack.prototype.eventHandlers.onLaunch = function (launchRequest, session, r
 };
 
 Blackjack.prototype.intentHandlers = {
-    "BasicStrategyIntent": function (intent, session, response) 
-    {
-        var totalSlot = intent.slots.HardTotal;
+    "BasicStrategyIntent": function (intent, session, response) {
         var dealerSlot = intent.slots.DealerCard;
         var playerTotal, dealerCard;
         var speech;
         var speechOutput;
         var repromptOutput;
+        var isSoft;
 
-        if (totalSlot && totalSlot.value) 
-        {
-            playerTotal = parseInt(totalSlot.value);
+        // OK, let's get the player total and whether it's hard or soft - from there we'll
+        // set up the hand appropriately
+        // BUGBUG - Pairs are not handled yet
+        if (intent.slots.HardTotal && intent.slots.HardTotal.value) {
+            playerTotal = parseInt(intent.slots.HardTotal.value);
+            isSoft = false;
+        } else if (intent.slots.SoftTotal && intent.slots.SoftTotal.value) {
+            playerTotal = parseInt(intent.slots.SoftTotal.value);
+            isSoft = true;
         }
-        if (dealerSlot && dealerSlot.value)
-        {
+
+        if (dealerSlot && dealerSlot.value) {
             // BUGBUG: For now you have to say "1" rather than ACE; "10" rather than Jack, Queen, King
             dealerCard = parseInt(dealerSlot.value);
         }
-        
+
         // We need to convert this into a hand we can pass in - for now, we'll just use a 2 or 10 along with the balance
         // and pass that in (yes, I know this doesn't cover pair of Aces, but bare with me for now)
-        // BUGBUG: Need speech intents for pairs, soft totals, etc.
         var playerCards = [];
         var cardTitle = "Basic Strategy Suggestion";
 
         // Check that the total is something we can handle - at the moment we can only process 3-21
-        if (!playerTotal || (playerTotal < 3) || (playerTotal > 21))
-        {
-            speech = "I'm sorry, the player total must be between 3 and 21 inclusive.  What else can I help with?";    
+        if (!playerTotal || (playerTotal < 3) || (playerTotal > 21)) {
+            speech = "I'm sorry, the player total must be between 3 and 21 inclusive.  What else can I help with?";
             speechOutput = {
                 speech: speech,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
@@ -93,8 +96,19 @@ Blackjack.prototype.intentHandlers = {
             };
             response.ask(speechOutput, repromptOutput);
         }
-        else if (!dealerCard || (dealerCard < 1) || (dealerCard > 10))
-        {
+        else if (isSoft && (playerTotal < 12)) {
+            speech = "I'm sorry, soft player totals must be at least 12.  What else can I help with?";
+            speechOutput = {
+                speech: speech,
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+            repromptOutput = {
+                speech: "What else can I help with?",
+                type: AlexaSkill.speechOutputType.PLAIN_TEXT
+            };
+            response.ask(speechOutput, repromptOutput);
+        }
+        else if (!dealerCard || (dealerCard < 1) || (dealerCard > 10)) {
             speech = "I'm sorry, the Dealer card must be a number between 1 and 10. Please say 1 for Ace and 10 for all face cards.  What else can I help with?";
             speechOutput = {
                 speech: speech,
@@ -106,15 +120,19 @@ Blackjack.prototype.intentHandlers = {
             };
             response.ask(speechOutput, repromptOutput);
         }
-        else
-        {
-            // BUGBUG: We'll just use default set of rules for now
-            playerCards.push(playerTotal > 11) ? 10 : 2;
-            playerCards.push(playerTotal - playerCards[0]);
+        else {
+            if (isSoft) {
+                playerCards.push(1);
+                playerCards.push(playerTotal - 11);
+            } else {
+                playerCards.push(playerTotal > 11) ? 10 : 2;
+                playerCards.push(playerTotal - playerCards[0]);
+            }
 
+            // BUGBUG: We'll just use default set of rules for now
             var suggest = strategy.GetRecommendedPlayerAction(playerCards, dealerCard, 1, true);
             speechOutput = {
-                speech: "You should " + suggest + " with " + playerTotal + " against a " + dealerCard,
+                speech: "You should " + suggest + " with " + (isSoft ? "soft " : "") + playerTotal + " against a " + dealerCard,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             response.tellWithCard(speechOutput, cardTitle, suggest);

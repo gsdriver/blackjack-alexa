@@ -8,6 +8,10 @@
         "type": "AMAZON.NUMBER"
       },
       {
+        "name": "SoftTotal",
+        "type": "AMAZON.NUMBER"
+      },
+      {
         "name": "DealerCard",
         "type": "AMAZON.NUMBER"
       }
