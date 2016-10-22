@@ -1,0 +1,25 @@
+BasicStrategyIntent what should a {HardTotal} do against a {DealerCard}
+BasicStrategyIntent what should a {HardTotal} do against an {DealerCard}
+BasicStrategyIntent what should an {HardTotal} do against a {DealerCard}
+BasicStrategyIntent what should a {HardTotal} do against an {DealerCard}
+BasicStrategyIntent what should {HardTotal} do against a {DealerCard}
+BasicStrategyIntent what should {HardTotal} do against {DealerCard}
+BasicStrategyIntent {HardTotal} against {DealerCard}
+BasicStrategyIntent what should I do with a {HardTotal} against a {DealerCard}
+BasicStrategyIntent what should I do with a {HardTotal} against an {DealerCard}
+BasicStrategyIntent what should I do with an {HardTotal} against a {DealerCard}
+BasicStrategyIntent what should I do with an {HardTotal} against an {DealerCard}
+BasicStrategyIntent what should a soft {SoftTotal} do against a {DealerCard}
+BasicStrategyIntent what should a soft {SoftTotal} do against an {DealerCard}
+BasicStrategyIntent what should soft {SoftTotal} do against a {DealerCard}
+BasicStrategyIntent what should soft {SoftTotal} do against {DealerCard}
+BasicStrategyIntent soft {SoftTotal} against {DealerCard}
+BasicStrategyIntent what should I do with a soft {SoftTotal} against a {DealerCard}
+BasicStrategyIntent what should I do with a soft {SoftTotal} against an {DealerCard}
+BasicStrategyIntent what should a hard {HardTotal} do against a {DealerCard}
+BasicStrategyIntent what should a hard {HardTotal} do against an {DealerCard}
+BasicStrategyIntent what should hard {HardTotal} do against a {DealerCard}
+BasicStrategyIntent what should hard {HardTotal} do against {DealerCard}
+BasicStrategyIntent hard {HardTotal} against {DealerCard}
+BasicStrategyIntent what should I do with a hard {HardTotal} against a {DealerCard}
+BasicStrategyIntent what should I do with a hard {HardTotal} against an {DealerCard}

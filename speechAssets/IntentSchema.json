@@ -1,0 +1,26 @@
+{
+  "intents": [
+    {
+      "intent": "BasicStrategyIntent",
+      "slots": [
+      {
+        "name": "HardTotal",
+        "type": "AMAZON.NUMBER"
+      },
+      {
+        "name": "DealerCard",
+        "type": "AMAZON.NUMBER"
+      }
+     ]
+    },
+   {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}
