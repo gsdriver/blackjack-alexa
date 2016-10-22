@@ -56,62 +56,35 @@ Blackjack.prototype.eventHandlers.onLaunch = function (launchRequest, session, r
 Blackjack.prototype.intentHandlers = {
     "BasicStrategyIntent": function (intent, session, response) {
         var dealerSlot = intent.slots.DealerCard;
-        var playerTotal, dealerCard;
+        var dealerCard;
+        var playerHand = {cards:[], total:0, isSoft:false};
         var speech;
+        var speechError = null;
         var speechOutput;
         var repromptOutput;
-        var isSoft;
 
         // OK, let's get the player total and whether it's hard or soft - from there we'll
         // set up the hand appropriately
         // BUGBUG - Pairs are not handled yet
-        if (intent.slots.HardTotal && intent.slots.HardTotal.value) {
-            playerTotal = parseInt(intent.slots.HardTotal.value);
-            isSoft = false;
-        } else if (intent.slots.SoftTotal && intent.slots.SoftTotal.value) {
-            playerTotal = parseInt(intent.slots.SoftTotal.value);
-            isSoft = true;
-        }
+        speechError = BuildPlayerHand(intent.slots, playerHand);
 
+        // And the dealer
         if (dealerSlot && dealerSlot.value) {
             // BUGBUG: For now you have to say "1" rather than ACE; "10" rather than Jack, Queen, King
-            dealerCard = parseInt(dealerSlot.value);
+            dealerCard = GetCardValue(dealerSlot.value);
+        }
+        if (!dealerCard || (dealerCard < 1) || (dealerCard > 10)) {
+            speechError = "I'm sorry, the Dealer card must be a number between 1 and 10. Please say 1 for Ace and 10 for all face cards.  What else can I help with?";
         }
 
         // We need to convert this into a hand we can pass in - for now, we'll just use a 2 or 10 along with the balance
         // and pass that in (yes, I know this doesn't cover pair of Aces, but bare with me for now)
-        var playerCards = [];
         var cardTitle = "Basic Strategy Suggestion";
 
-        // Check that the total is something we can handle - at the moment we can only process 3-21
-        if (!playerTotal || (playerTotal < 3) || (playerTotal > 21)) {
-            speech = "I'm sorry, the player total must be between 3 and 21 inclusive.  What else can I help with?";
+        if (speechError)
+        {
             speechOutput = {
-                speech: speech,
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };
-            repromptOutput = {
-                speech: "What else can I help with?",
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };
-            response.ask(speechOutput, repromptOutput);
-        }
-        else if (isSoft && (playerTotal < 12)) {
-            speech = "I'm sorry, soft player totals must be at least 12.  What else can I help with?";
-            speechOutput = {
-                speech: speech,
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };
-            repromptOutput = {
-                speech: "What else can I help with?",
-                type: AlexaSkill.speechOutputType.PLAIN_TEXT
-            };
-            response.ask(speechOutput, repromptOutput);
-        }
-        else if (!dealerCard || (dealerCard < 1) || (dealerCard > 10)) {
-            speech = "I'm sorry, the Dealer card must be a number between 1 and 10. Please say 1 for Ace and 10 for all face cards.  What else can I help with?";
-            speechOutput = {
-                speech: speech,
+                speech: speechError,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             repromptOutput = {
@@ -121,18 +94,14 @@ Blackjack.prototype.intentHandlers = {
             response.ask(speechOutput, repromptOutput);
         }
         else {
-            if (isSoft) {
-                playerCards.push(1);
-                playerCards.push(playerTotal - 11);
-            } else {
-                playerCards.push(playerTotal > 11) ? 10 : 2;
-                playerCards.push(playerTotal - playerCards[0]);
-            }
-
             // BUGBUG: We'll just use default set of rules for now
-            var suggest = strategy.GetRecommendedPlayerAction(playerCards, dealerCard, 1, true);
+            var suggest = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true);
+            speech = "You should " + suggest + " with " + (playerHand.isSoft ? "soft " : "") + playerHand.total + " against ";
+            speech += ((dealerCard == 1) || (dealerCard == 8)) ? "an " : "a ";
+            speech += (dealerCard == 1) ? "ace" : dealerCard;
+
             speechOutput = {
-                speech: "You should " + suggest + " with " + (isSoft ? "soft " : "") + playerTotal + " against a " + dealerCard,
+                speech: speech,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
             };
             response.tellWithCard(speechOutput, cardTitle, suggest);
@@ -163,6 +132,74 @@ Blackjack.prototype.intentHandlers = {
         response.ask(speechOutput, repromptOutput);
     }
 };
+
+function GetCardValue(card)
+{
+    const mapping = [
+        {card:"ace", value:1},
+        {card:"jack", value:10},
+        {card:"queen", value:10},
+        {card:"king", value:10},
+        {card:"aces", value:1},
+        {card:"jacks", value:10},
+        {card:"queens", value:10},
+        {card:"kings", value:10}
+    ];
+    
+    // Lookup in mapping table
+    for (var i = 0; i < mapping.length; i++)
+    {
+        if (mapping[i].card == card)
+        {
+            return mapping[i].value;
+        }
+    }  
+
+    // Nope, not there - see if you can just convert to a number
+    return parseInt(card);
+}
+
+function BuildPlayerHand(slots, playerHand)
+{
+    var error = null;
+    var isSoft;
+    var playerTotal;
+
+    // OK, let's get the player total and whether it's hard or soft - from there we'll
+    // set up the hand appropriately
+    // BUGBUG - Pairs are not handled yet
+    if (slots.HardTotal && slots.HardTotal.value) {
+        playerTotal = parseInt(slots.HardTotal.value);
+        isSoft = false;
+    } else if (slots.SoftTotal && slots.SoftTotal.value) {
+        playerTotal = parseInt(slots.SoftTotal.value);
+        isSoft = true;
+    }
+
+    // Check that the total is something we can handle - at the moment we can only process 3-21
+    if (!playerTotal || (playerTotal < 3) || (playerTotal > 21)) {
+        error = "I'm sorry, the player total must be between 3 and 21 inclusive.  What else can I help with?";
+    }
+    else if (isSoft && (playerTotal < 12)) {
+        error = "I'm sorry, soft player totals must be at least 12.  What else can I help with?";
+    }
+    else 
+    {
+        // We need to convert this into a hand we can pass in - for now, we'll just use a 2 or 10 along with the balance
+        // and pass that in (yes, I know this doesn't cover pair of Aces, but bare with me for now)
+        if (isSoft) {
+            playerHand.cards.push(1);
+            playerHand.cards.push(playerTotal - 11);
+        } else {
+            playerHand.cards.push(playerTotal > 11) ? 10 : 2;
+            playerHand.cards.push(playerTotal - playerHand.cards[0]);
+        }
+        playerHand.isSoft = isSoft;
+        playerHand.total = playerTotal;
+    }
+
+    return error;
+}
 
 exports.handler = function (event, context) 
 {

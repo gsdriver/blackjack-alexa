@@ -13,7 +13,7 @@
       },
       {
         "name": "DealerCard",
-        "type": "AMAZON.NUMBER"
+        "type": "LIST_OF_CARDS"
       }
      ]
     },
