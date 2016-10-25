@@ -28,5 +28,49 @@ BasicStrategyIntent what should a pair of {PairCard} do against an {DealerCard}
 BasicStrategyIntent what should {PairCard} pair do against a {DealerCard}
 BasicStrategyIntent what should {PairCard} pair do against {DealerCard}
 BasicStrategyIntent pair of {PairCard} against {DealerCard}
-BasicStrategyIntent what should I do with a pair of {PairCard} against a {DealerCard}
-BasicStrategyIntent what should I do with a pair of {PairCard} against an {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} on a {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} on an {DealerCard}
+BasicStrategyIntent what should a {HardTotal} do on a {DealerCard}
+BasicStrategyIntent what should a {HardTotal} do on an {DealerCard}
+BasicStrategyIntent what should an {HardTotal} do on a {DealerCard}
+BasicStrategyIntent what should a {HardTotal} do on an {DealerCard}
+BasicStrategyIntent what should {HardTotal} do on a {DealerCard}
+BasicStrategyIntent what should {HardTotal} do on {DealerCard}
+BasicStrategyIntent {HardTotal} on {DealerCard}
+BasicStrategyIntent what should I do with a {HardTotal} on a {DealerCard}
+BasicStrategyIntent what should I do with a {HardTotal} on an {DealerCard}
+BasicStrategyIntent what should I do with an {HardTotal} on a {DealerCard}
+BasicStrategyIntent what should I do with an {HardTotal} on an {DealerCard}
+BasicStrategyIntent what should a soft {SoftTotal} do on a {DealerCard}
+BasicStrategyIntent what should a soft {SoftTotal} do on an {DealerCard}
+BasicStrategyIntent what should soft {SoftTotal} do on a {DealerCard}
+BasicStrategyIntent what should soft {SoftTotal} do on {DealerCard}
+BasicStrategyIntent soft {SoftTotal} on {DealerCard}
+BasicStrategyIntent what should I do with a soft {SoftTotal} on a {DealerCard}
+BasicStrategyIntent what should I do with a soft {SoftTotal} on an {DealerCard}
+BasicStrategyIntent what should a hard {HardTotal} do on a {DealerCard}
+BasicStrategyIntent what should a hard {HardTotal} do on an {DealerCard}
+BasicStrategyIntent what should hard {HardTotal} do on a {DealerCard}
+BasicStrategyIntent what should hard {HardTotal} do on {DealerCard}
+BasicStrategyIntent hard {HardTotal} on {DealerCard}
+BasicStrategyIntent what should I do with a hard {HardTotal} on a {DealerCard}
+BasicStrategyIntent what should I do with a hard {HardTotal} on an {DealerCard}
+BasicStrategyIntent what should a pair of {PairCard} do on a {DealerCard}
+BasicStrategyIntent what should a pair of {PairCard} do on an {DealerCard}
+BasicStrategyIntent what should {PairCard} pair do on a {DealerCard}
+BasicStrategyIntent what should {PairCard} pair do on {DealerCard}
+BasicStrategyIntent pair of {PairCard} on {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} on a {DealerCard}
+BasicStrategyIntent what should I do with a pair of {PairCard} on an {DealerCard}
+BasicStrategyIntent play {HardTotal} against {DealerCard}
+BasicStrategyIntent play {HardTotal} against a {DealerCard}
+BasicStrategyIntent play {HardTotal} against an {DealerCard}
+BasicStrategyIntent play soft {SoftTotal} against {DealerCard}
+BasicStrategyIntent play soft {SoftTotal} against a {DealerCard}
+BasicStrategyIntent play soft {SoftTotal} against an {DealerCard}
+BasicStrategyIntent play pair of {PairCard} against {DealerCard}
+BasicStrategyIntent play pair of {PairCard} against a {DealerCard}
+BasicStrategyIntent play pair of {PairCard} against an {DealerCard}
+BasicStrategyIntent play {PairCard} pair against {DealerCard}
+BasicStrategyIntent play {PairCard} pair against a {DealerCard}
+BasicStrategyIntent play {PairCard} pair against an {DealerCard}

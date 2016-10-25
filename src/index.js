@@ -27,14 +27,8 @@
 var AlexaSkill = require('./AlexaSkill');
 var strategy = require('blackjack-strategy');
 
-var APP_ID = undefined; //OPTIONAL: replace with 'amzn1.echo-sdk-ams.app.[your-unique-value-here]';
+var APP_ID = "amzn1.ask.skill.5c69fc59-ea7a-4cc8-b8e6-dd200a5ba9aa"; 
 
-/**
- * MinecraftHelper is a child of AlexaSkill.
- * To read more about inheritance in JavaScript, see the link below.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
- */
 var Blackjack = function () {
     AlexaSkill.call(this, APP_ID);
 };
@@ -54,6 +48,7 @@ Blackjack.prototype.eventHandlers.onLaunch = function (launchRequest, session, r
 };
 
 Blackjack.prototype.intentHandlers = {
+    // Basic Strategy Intent
     "BasicStrategyIntent": function (intent, session, response) {
         var dealerSlot = intent.slots.DealerCard;
         var dealerCard;
@@ -65,16 +60,14 @@ Blackjack.prototype.intentHandlers = {
 
         // OK, let's get the player total and whether it's hard or soft - from there we'll
         // set up the hand appropriately
-        // BUGBUG - Pairs are not handled yet
         speechError = BuildPlayerHand(intent.slots, playerHand);
 
         // And the dealer
         if (dealerSlot && dealerSlot.value) {
-            // BUGBUG: For now you have to say "1" rather than ACE; "10" rather than Jack, Queen, King
             dealerCard = GetCardValue(dealerSlot.value);
         }
         if (!dealerCard || (dealerCard < 1) || (dealerCard > 10)) {
-            speechError = "I'm sorry, the Dealer card must be a number between 1 and 10. Please say 1 for Ace and 10 for all face cards.  What else can I help with?";
+            speechError = "I'm sorry, I did not hear a dealer card.  What else can I help with?";
         }
 
         // We need to convert this into a hand we can pass in - for now, we'll just use a 2 or 10 along with the balance
@@ -163,7 +156,6 @@ function BuildPlayerHand(slots, playerHand)
 
     // OK, let's get the player total and whether it's hard or soft - from there we'll
     // set up the hand appropriately
-    // BUGBUG - Pairs are not handled yet
     if (slots.HardTotal && slots.HardTotal.value) {
         playerTotal = parseInt(slots.HardTotal.value);
         isSoft = false;
@@ -180,7 +172,10 @@ function BuildPlayerHand(slots, playerHand)
     }
 
     // Check that the total is something we can handle
-    if (!playerTotal || (playerTotal < 2) || (playerTotal > 21)) {
+    if (!playerTotal) {
+        error = "I'm sorry, I didn't hear a player total.  What else can I help with?";
+    }
+    else if ((playerTotal < 2) || (playerTotal > 21)) {
         error = "I'm sorry, the player total must be between 2 and 21 inclusive.  What else can I help with?";
     }
     else if (isSoft && (playerTotal < 12)) {
@@ -212,7 +207,7 @@ function GetSuggstion(playerHand, dealerCard)
     var isPair;
                 
     // BUGBUG: We'll just use default set of rules for now
-    suggest.action = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true);
+    suggest.action = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {strategyComplexity: "advanced"});
     if (suggest.action == "noinsurance")
     {
         return "You should never take insurance";
@@ -238,18 +233,19 @@ function GetSuggstion(playerHand, dealerCard)
     if (suggest.action == "double")
     {
         // Try again with a no double rule
-        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {doubleRange:[0,0]});
+        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {strategyComplexity: "advanced", doubleRange:[0,0]});
         suggest.speechText += ". If double is not allowed, you should " + suggestion;
     }
     else if (suggest.action == "surrender")
     {
         // Try again with no surrender
-        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {surrender:"none"});
+        var suggestion = strategy.GetRecommendedPlayerAction(playerHand.cards, dealerCard, 1, true, {strategyComplexity: "advanced", surrender:"none"});
         suggest.speechText += ". If surrender is not allowed, you should " + suggestion;
     }
 
     return suggest;    
 }
+
 
 exports.handler = function (event, context) 
 {
