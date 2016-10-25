@@ -52,7 +52,7 @@ Blackjack.prototype.intentHandlers = {
     "BasicStrategyIntent": function (intent, session, response) {
         var dealerSlot = intent.slots.DealerCard;
         var dealerCard;
-        var playerHand = {cards:[], total:0, isSoft:false};
+        var playerHand = {cards:[], pairCard:null, total:0, isSoft:false};
         var suggestion;
         var speechError = null;
         var speechOutput;
@@ -87,7 +87,7 @@ Blackjack.prototype.intentHandlers = {
             response.ask(speechOutput, repromptOutput);
         }
         else {
-            suggestion = GetSuggstion(playerHand, dealerCard);
+            suggestion = GetSuggstion(playerHand, dealerCard, dealerSlot.value);
             speechOutput = {
                 speech: suggestion.speechText,
                 type: AlexaSkill.speechOutputType.PLAIN_TEXT
@@ -133,11 +133,12 @@ function GetCardValue(card)
         {card:"queens", value:10},
         {card:"kings", value:10}
     ];
-    
+    var cardlower = card.toLowerCase();
+
     // Lookup in mapping table
     for (var i = 0; i < mapping.length; i++)
     {
-        if (mapping[i].card == card)
+        if (mapping[i].card == cardlower)
         {
             return mapping[i].value;
         }
@@ -187,6 +188,7 @@ function BuildPlayerHand(slots, playerHand)
         if (pairCard) {
             playerHand.cards.push(pairCard);
             playerHand.cards.push(pairCard);
+            playerHand.pairCard = slots.PairCard.value;
         } else if (isSoft) {
             playerHand.cards.push(1);
             playerHand.cards.push(playerTotal - 11);
@@ -201,7 +203,7 @@ function BuildPlayerHand(slots, playerHand)
     return error;
 }
 
-function GetSuggstion(playerHand, dealerCard)
+function GetSuggstion(playerHand, dealerCard, dealerValue)
 {
     var suggest = {speechText: "", action: ""};
     var isPair;
@@ -219,7 +221,7 @@ function GetSuggstion(playerHand, dealerCard)
     if (isPair)
     {
         suggest.speechText += "a pair of ";
-        suggest.speechText += (playerHand.cards[0] == 1) ? "aces" : (playerHand.cards[0] + "s");
+        suggest.speechText += (playerHand.pairCard + "s");
     }
     else
     {
@@ -228,7 +230,7 @@ function GetSuggstion(playerHand, dealerCard)
 
     suggest.speechText +=  " against ";
     suggest.speechText += ((dealerCard == 1) || (dealerCard == 8)) ? "an " : "a ";
-    suggest.speechText += (dealerCard == 1) ? "ace" : dealerCard;
+    suggest.speechText += dealerValue;
 
     if (suggest.action == "double")
     {
