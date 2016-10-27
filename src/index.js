@@ -27,7 +27,7 @@
 var AlexaSkill = require('./AlexaSkill');
 var strategy = require('blackjack-strategy');
 
-var APP_ID = "amzn1.ask.skill.5c69fc59-ea7a-4cc8-b8e6-dd200a5ba9aa"; 
+var APP_ID = "amzn1.ask.skill.b5bf5e2b-8452-4a1a-b6d7-09bec1d2396b";
 
 var Blackjack = function () {
     AlexaSkill.call(this, APP_ID);
@@ -221,7 +221,13 @@ function GetSuggstion(playerHand, dealerCard, dealerValue)
     if (isPair)
     {
         suggest.speechText += "a pair of ";
-        suggest.speechText += (playerHand.pairCard + "s");
+        suggest.speechText += playerHand.pairCard;
+        
+        // Don't add an "s" if the paircard already ends in s
+        if (playerHand.pairCard.slice(-1).toUpperCase() != "S")
+        {
+            suggest.speechText += "s";
+        }
     }
     else
     {
